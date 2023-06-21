@@ -1,0 +1,18 @@
+[package]
+name = "todolist"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4.3.1"
+shuttle-actix-web = "0.19.0"
+shuttle-runtime = "0.19.0"
+serde = "1.0.148"
+shuttle-shared-db = { version = "0.19.0", features = ["postgres"] }
+sqlx = { version = "0.6.3", features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+    "chrono",
+] }
+tokio = "1.26.0"
+chrono = "0.4.26"
