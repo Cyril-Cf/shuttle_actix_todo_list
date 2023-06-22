@@ -10,14 +10,18 @@ use serde::{Deserialize, Serialize};
 use shuttle_actix_web::ShuttleActixWeb;
 use shuttle_runtime::CustomError;
 use sqlx::{Executor, FromRow, PgPool};
+use actix_cors::Cors;
+use std::sync::Arc;
 
 #[get("")]
 async fn retrieve_all(state: web::Data<AppState>) -> Result<Json<Vec<Todo>>> {
-    let todos = sqlx::query_as("SELECT * FROM todos")
+    let mut todos: Vec<Todo> = sqlx::query_as("SELECT * FROM todos")
         .fetch_all(&state.pool)
         .await
         .map_err(|e| error::ErrorBadRequest(e.to_string()))?;
-
+    for todo in &mut todos {
+        todo.owner_password = "secret!".to_string();
+    }
     Ok(Json(todos))
 }
 
@@ -66,12 +70,12 @@ async fn update(
 
 #[get("/{id}")]
 async fn retrieve(path: web::Path<i32>, state: web::Data<AppState>) -> Result<Json<Todo>> {
-    let todo = sqlx::query_as("SELECT * FROM todos WHERE id = $1")
+    let mut todo: Todo = sqlx::query_as("SELECT * FROM todos WHERE id = $1")
         .bind(*path)
         .fetch_one(&state.pool)
         .await
         .map_err(|e| error::ErrorBadRequest(e.to_string()))?;
-
+    todo.owner_password = "secret!".to_string();
     Ok(Json(todo))
 }
 
@@ -165,6 +169,12 @@ async fn actix_web(
     let state = web::Data::new(AppState { pool });
 
     let config = move |cfg: &mut ServiceConfig| {
+        let cors = Cors::default()
+        .allow_any_method()
+        .allow_any_header()
+        .allow_any_origin()
+        .max_age(3600);
+    
         cfg.service(
             web::scope("/todos")
                 .wrap(Logger::default())
@@ -174,7 +184,8 @@ async fn actix_web(
                 .service(update)
                 .service(reset_all)
                 .service(delete_todo)
-                .app_data(state),
+                .app_data(state)
+                .wrap(Arc::new(cors))
         );
     };
 

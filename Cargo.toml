@@ -16,3 +16,4 @@ sqlx = { version = "0.6.3", features = [
 ] }
 tokio = "1.26.0"
 chrono = "0.4.26"
+actix-cors = "0.6.4"
