@@ -1,4 +1,7 @@
-CREATE TABLE IF NOT EXISTS todos (
+
+DROP TABLE IF EXISTS todos;
+
+CREATE TABLE todos (
   id serial PRIMARY KEY,
   note TEXT NOT NULL,
   date_time_created TIMESTAMP NOT NULL,

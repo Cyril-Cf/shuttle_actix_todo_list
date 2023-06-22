@@ -120,7 +120,7 @@ async fn delete_todo(
 async fn reset_all(state: web::Data<AppState>) -> Result<HttpResponse> {
     state
         .pool
-        .execute(include_str!("../schema.sql"))
+        .execute(include_str!("../schema_drop.sql"))
         .await
         .map_err(|e| {
             eprintln!("Failed to reset database: {}", e);
